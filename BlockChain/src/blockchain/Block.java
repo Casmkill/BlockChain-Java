@@ -20,6 +20,9 @@ public class Block {
     private String blockHash;
     private String nonce;
     private List<String> data;
+    
+    
+    
 
     public Block(int index, String previousHash, String blockHash, String nonce, List<String> data) {
         this.index = index;
