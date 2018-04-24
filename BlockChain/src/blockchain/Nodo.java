@@ -13,9 +13,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.HashMap;
+
 import java.util.List;
-import java.util.Map;
+
 import java.util.Set;
 
 import com.sun.net.httpserver.Headers;
@@ -25,6 +25,7 @@ import com.sun.net.httpserver.HttpServer;
 import com.sun.xml.internal.ws.api.message.Packet;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 import javafx.util.Pair;
@@ -40,7 +41,7 @@ import org.json.JSONObject;
 
 public class Nodo {
 
-    public static List<Integer> nodos;
+    public static List<Pair<String,String>> nodos;
 
     public static BlockChain blockChain;
 
@@ -52,11 +53,12 @@ public class Nodo {
      */
     public static void main(String[] args) throws Exception {
 
-        nodos = new ArrayList<>();
+         nodos = new ArrayList<>();
 
         System.out.println("Ingrese un puerto");
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         port = Integer.parseInt(br.readLine());
+        
 
         // TODO code application logic here
         System.out.println("Bienvenido...");
@@ -83,9 +85,18 @@ public class Nodo {
             String[] tokens = answer.split(",");
 
             for (String token : tokens) {
-                nodos.add(Integer.parseInt(token));
+                String[] tokens_1 = token.split(":");
+                
+                
+                System.out.println(tokens_1[0] + ":" + tokens_1[1]);
+
+                Pair<String,String> p = new Pair<>(tokens_1[0],tokens_1[1]);
+                nodos.add(p);
             }
-            tools.Request.addselfToNetwork(nodos, server.getAddress().getPort());
+            
+            String [] t = InetAddress.getLocalHost().toString().split("/");
+            Pair<String,String> p = new Pair<>(t[1],String.valueOf( server.getAddress().getPort()));
+            tools.Request.addselfToNetwork(nodos,p);
             JSONArray chain = tools.Request.getChainFromNodes(nodos);
 
             // Omite el bloque génesis
@@ -196,7 +207,9 @@ public class Nodo {
             BufferedReader br = new BufferedReader(isr);
             String query = br.readLine();
             JSONObject request = new JSONObject(query);
-            nodos.add(request.getInt("port"));
+            
+            Pair<String,String> pair = new Pair<>(request.getString("ip"),request.getString("port"));
+            nodos.add(pair);
             System.out.println("---Agregando nodo a la lista de nodos, " + request.getInt("port"));
 
             String response = "agregado";
